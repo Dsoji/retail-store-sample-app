@@ -1,0 +1,42 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Trigger on push to main branch
+  pull_request:
+    branches:
+      - main # Trigger on PR to main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/retail-store-app:${{ github.sha }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/retail-store-app:${{ github.sha }}
+
+      # Log into Kubernetes
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          kubectl-version: "latest"
+
+      - name: Configure kubectl
+        run: |
+          kubectl config set-cluster my-cluster --server=${{ secrets.K8S_API_SERVER }}
+          kubectl config set-credentials deployer --token=${{ secrets.K8S_TOKEN }}
+          kubectl config set-context my-context --cluster=my-cluster --user=deployer
+          kubectl config use-context my-context
+
+      # Deploy to Kubernetes
+      - name: Apply Kubernetes Deployment
+        run: |
+          kubectl apply -f kubernetes/deployment.yaml
+          kubectl apply -f kubernetes/service.yaml  # Apply any other k8s resources like services, ingress, etc.
