@@ -3,17 +3,17 @@ kind: Deployment
 metadata:
   name: retail-store-app
 spec:
-  replicas: 3 # Number of pods to deploy
+  replicas: 3
   selector:
     matchLabels:
-      app: retail-store # Match the label for the pods
+      app: retail-store
   template:
     metadata:
       labels:
-        app: retail-store # Apply this label to the pods
+        app: retail-store
     spec:
       containers:
         - name: retail-store-app
-          image: myusername/retail-store-app:latest # Replace with your container image
+          image: myusername/retail-store-app:latest
           ports:
-            - containerPort: 80 # The port your container exposes
+            - containerPort: 80

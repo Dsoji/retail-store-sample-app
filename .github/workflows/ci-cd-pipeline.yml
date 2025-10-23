@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main # Trigger on push to main branch
+      - main
   pull_request:
     branches:
-      - main # Trigger on PR to main branch
+      - main
 
 jobs:
   build:
@@ -16,13 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Build Docker image
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/retail-store-app:${{ github.sha }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/retail-store-app:${{ github.sha }}
 
-      # Log into Kubernetes
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
         with:
@@ -35,8 +33,11 @@ jobs:
           kubectl config set-context my-context --cluster=my-cluster --user=deployer
           kubectl config use-context my-context
 
-      # Deploy to Kubernetes
-      - name: Apply Kubernetes Deployment
+      - name: Apply Kubernetes Resources
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-          kubectl apply -f kubernetes/service.yaml  # Apply any other k8s resources like services, ingress, etc.
+          kubectl apply -f kubernetes/service.yaml    # Update your services (retail-store-app, RabbitMQ, etc.)
+          kubectl apply -f kubernetes/rabbitmq-deployment.yaml  # Apply RabbitMQ service update
+          kubectl apply -f kubernetes/mysql-deployment.yaml    # MySQL Deployment
+          kubectl apply -f kubernetes/postgres-deployment.yaml # PostgreSQL Deployment
+          kubectl apply -f kubernetes/redis-deployment.yaml    # Redis Deployment
