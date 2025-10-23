@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retail-store-app
+spec:
+  replicas: 3 # Number of pods to deploy
+  selector:
+    matchLabels:
+      app: retail-store # Match the label for the pods
+  template:
+    metadata:
+      labels:
+        app: retail-store # Apply this label to the pods
+    spec:
+      containers:
+        - name: retail-store-app
+          image: myusername/retail-store-app:latest # Replace with your container image
+          ports:
+            - containerPort: 80 # The port your container exposes
